@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Signature with DSA</title>
+    <style>
+        /* Gaya untuk body halaman */
+        body {
+            font-family: Arial, sans-serif; /* Font utama */
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* Tinggi halaman penuh */
+            background-image: url('{{ url_for("static", filename="kriptografi.jpg") }}'); /* Gambar latar belakang */
+            background-size: cover; /* Latar belakang menutupi seluruh halaman */
+            background-position: center; /* Posisi gambar di tengah */
+        }
+        /* Gaya untuk judul utama */
+        h1 {
+            color: white; /* Warna teks putih */
+            text-align: center; /* Teks rata tengah */
+            margin-top: 20px;
+            animation: moveRight 5s linear infinite; /* Animasi teks bergerak */
+        }
+        /* Gaya untuk subjudul */
+        h2 {
+            color: red; /* Warna teks merah */
+        }
+        /* Animasi teks bergerak ke kanan */
+        @keyframes moveRight {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(100%); }
+        }
+        /* Gaya untuk textarea */
+        textarea {
+            width: 100%; /* Lebar penuh */
+            height: 100px; /* Tinggi 100px */
+        }
+        /* Gaya untuk tombol */
+        button {
+            padding: 10px 20px; /* Padding dalam tombol */
+            margin-top: 10px;
+            cursor: pointer; /* Ubah kursor menjadi pointer saat hover */
+        }
+        /* Gaya untuk elemen pre */
+        pre {
+            background: #f0f0f0; /* Warna latar belakang abu-abu muda */
+            padding: 10px; /* Padding dalam elemen */
+        }
+    </style>
+</head>
+<body>
+    <!-- Judul halaman -->
+    <h1>Digital Signature with DSA & SHA-1</h1>
+    <!-- Subjudul dengan nama kelompok -->
+    <h2>DSA&SHA-1 <span>Kelompok 4</span></h2>
+
+    <!-- Bagian untuk menghasilkan kunci -->
+    <h2>1. Generate Keys</h2>
+    <button onclick="generateKeys()">Generate DSA Keys</button> <!-- Tombol untuk menghasilkan kunci -->
+    <pre id="keysOutput">Private Key and Public Key will appear here.</pre> <!-- Tempat hasil kunci muncul -->
+
+    <!-- Bagian untuk menandatangani pesan -->
+    <h2>2. Sign a Message</h2>
+    <textarea id="messageInput" placeholder="Enter a message to sign"></textarea> <!-- Input pesan -->
+    <button onclick="signMessage()">Sign Message</button> <!-- Tombol untuk menandatangani pesan -->
+    <pre id="signatureOutput">Signature will appear here.</pre> <!-- Tempat hasil tanda tangan muncul -->
+
+    <!-- Bagian untuk verifikasi tanda tangan -->
+    <h2>3. Verify Signature</h2>
+    <textarea id="verifyMessageInput" placeholder="Enter the message to verify"></textarea> <!-- Input pesan untuk verifikasi -->
+    <textarea id="signatureInput" placeholder="Enter the signature"></textarea> <!-- Input tanda tangan untuk verifikasi -->
+    <button onclick="verifySignature()">Verify Signature</button> <!-- Tombol untuk verifikasi tanda tangan -->
+    <pre id="verificationOutput">Verification result will appear here.</pre> <!-- Tempat hasil verifikasi muncul -->
+
+    <script>
+        // Fungsi untuk menghasilkan kunci DSA
+        async function generateKeys() {
+            const response = await fetch('/generate_keys', { method: 'POST' }); // Permintaan ke server
+            const data = await response.json(); // Parsing data JSON
+            document.getElementById('keysOutput').innerText = 
+                "Private Key:\n" + data.private_key + "\n\nPublic Key:\n" + data.public_key; // Menampilkan kunci di layar
+        }
+
+        // Fungsi untuk menandatangani pesan
+        async function signMessage() {
+            const message = document.getElementById('messageInput').value; // Ambil pesan dari input
+            const response = await fetch('/sign_message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, // Format data
+                body: `message=${message}` // Pesan yang dikirimkan
+            });
+            const data = await response.json(); // Parsing data JSON
+            document.getElementById('signatureOutput').innerText = "Signature:\n" + data.signature; // Tampilkan tanda tangan
+        }
+
+        // Fungsi untuk memverifikasi tanda tangan
+        async function verifySignature() {
+            const message = document.getElementById('verifyMessageInput').value; // Ambil pesan untuk verifikasi
+            const signature = document.getElementById('signatureInput').value; // Ambil tanda tangan untuk verifikasi
+
+            const response = await fetch('/verify_signature', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, // Format data
+                body: `message=${message}&signature=${signature}` // Data yang dikirimkan
+            });
+            const data = await response.json(); // Parsing data JSON
+            document.getElementById('verificationOutput').innerText = data.result; // Tampilkan hasil verifikasi
+        }
+    </script>
+</body>
+</html>
